@@ -1,0 +1,87 @@
+// Toony Colors Pro+Mobile 2
+// (c) 2014-2020 Jean Moreno
+
+// Shader Generator Module: Reflection
+// NOTE: 'REFLECTION_SHADER_FEATURE' has to be defined in the Template file
+
+#FEATURES
+sngl	lbl="Reflection Cubemap"		kw=REFLECTION_CUBEMAP												tt="Enables cubemap reflection"
+sngl	lbl="Reflection Smoothness"		kw=REFL_ROUGH				needs=REFLECTION_CUBEMAP	indent		tt="Simulates reflection smoothness/roughness using the cubemap's mipmap levels\n\nMake sure to enable mipmaps and specular convolution for the cubemap texture!"
+#END
+
+//================================================================
+
+#PROPERTIES_NEW
+/// IF REFLECTION_CUBEMAP
+	header			Reflection
+	color			Reflection Cubemap Color		lighting, imp(color, label = "Color", default = (1, 1, 1, 1))
+	/// IF REFL_ROUGH
+		float		Reflection Cubemap Smoothness	lighting, imp(range, label = "Cubemap Smoothness", default = 0.5, min = 0, max = 1)
+	///
+///
+#END
+
+//================================================================
+
+#KEYWORDS
+/// IF REFLECTION_CUBEMAP
+	feature_on			USE_WORLD_NORMAL_FRAGMENT
+	feature_on			USE_VIEW_DIRECTION_FRAGMENT
+///
+#END
+
+//================================================================
+
+#PROPERTIES_BLOCK
+/// IF REFLECTION_CUBEMAP
+
+		[NoScaleOffset] _Cube ("Reflection Cubemap", Cube) = "black" {}
+		[[PROP:Reflection Cubemap Color]]
+	/// IF REFL_ROUGH
+		[[PROP:Reflection Cubemap Smoothness]]
+	///
+///
+#END
+
+//================================================================
+
+#VARIABLES
+/// IF REFLECTION_CUBEMAP
+	samplerCUBE _Cube;
+///
+#END
+
+//================================================================
+
+#INPUT
+#END
+
+//================================================================
+
+#VERTEX
+#END
+
+//================================================================
+
+#LIGHTING(float4 color, float3 normal, float3 viewDir)
+/// IF REFLECTION_CUBEMAP
+
+/// IF REFLECTION_SHADER_FEATURE
+		#if defined(TCP2_REFLECTIONS)
+///
+		//Reflection cubemap
+		half3 reflectVector = reflect(-viewDir, normal);
+	/// IF REFL_ROUGH
+		fixed4 reflColor = texCUBElod(_Cube, half4(reflectVector.xyz, [[VALUE:Reflection Cubemap Smoothness]]));
+	/// ELSE
+		fixed4 reflColor = texCUBE(_Cube, reflectVector);
+	///
+		reflColor.rgb *= [[VALUE:Reflection Cubemap Color]];
+	/// IF !RIM_REFL
+		color.rgb += reflColor.rgb;
+	///
+	/// IF REFLECTION_SHADER_FEATURE
+		#endif
+	///
+///
+#END

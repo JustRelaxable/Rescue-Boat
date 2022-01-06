@@ -1,0 +1,232 @@
+// Toony Colors Pro+Mobile 2
+// (c) 2014-2020 Jean Moreno
+
+// Shader Generator Module: Specular
+
+#FEATURES
+mult	lbl="Specular"				kw=Off|,Blinn-Phong|SPEC_LEGACY,PBR Blinn-Phong|SPEC_PBR_BLINNPHONG,GGX|SPEC_PBR_GGX,Anisotropic|SPECULAR_ANISOTROPIC		toggles=SPECULAR	help="featuresreference/lighting/specular"
+mult	lbl="Stylized Specular"		kw=Off|,Cartoon|SPECULAR_TOON,Bands|SPECULAR_TOON_BAND,Texture Ramp|SPECULAR_RAMP	needsOr=SPEC_LEGACY,SPECULAR_ANISOTROPIC	indent		tt="Specular stylization"
+sngl	lbl="Visible over Shadows"	kw=SPECULAR_NO_ATTEN																needs=SPECULAR								indent		tt="Shadows don't affect specular visibility"	
+sngl	lbl="Make Optional"			kw=SPECULAR_SHADER_FEATURE															needs=SPECULAR								indent		tt="Will make specular optional in the material inspector, using a shader keyword"
+#END
+
+//================================================================
+
+#PROPERTIES_NEW
+/// IF SPECULAR
+	header			Specular
+	color			Specular Color				lighting, imp(color, label = "Specular Color", default = (0.5, 0.5, 0.5, 1))
+	/// IF SPECULAR_ANISOTROPIC || (SPEC_LEGACY && !SPECULAR_RAMP && !SPECULAR_TOON)
+		float		Specular Smoothness			lighting, imp(float, label = "Smoothness", default = 0.2)
+	/// ELIF SPEC_PBR_BLINNPHONG || SPEC_PBR_GGX
+		float		Specular Roughness PBR		lighting, imp(range, label = "Roughness", default = 0.5, min = 0, max = 1)
+	///
+	/// IF SPECULAR_ANISOTROPIC
+		float		Anisotropic Spread			lighting, imp(range, label = "Anisotropic Spread", default = 1.0, min = 0, max = 2)
+	///
+	/// IF SPECULAR_TOON
+		float		Specular Toon Size			lighting, imp(range, label = "Toon Size", default = 0.25, min = 0, max = 1)
+		float		Specular Toon Smoothness	lighting, imp(range, label = "Toon Smoothness", default = 0.05, min = 0.001, max = 0.5)
+
+	/// ELIF SPECULAR_TOON_BAND
+		float		Specular Toon Bands			lighting, imp(float, label = "Specular Bands", default = 3)
+	///
+///
+#END
+
+//================================================================
+
+#KEYWORDS
+/// IF SPECULAR
+	feature_on		USE_VIEW_DIRECTION_FRAGMENT
+///
+/// IF SPECULAR_ANISOTROPIC
+	feature_on		USE_TANGENT_FRAGMENT
+	feature_on		USE_BITANGENT_FRAGMENT
+	feature_on		USE_NDV_FRAGMENT
+///
+#END
+
+//================================================================
+
+#SHADER_FEATURES_BLOCK
+/// IF SPECULAR && SPECULAR_SHADER_FEATURE
+	#pragma shader_feature TCP2_SPECULAR
+///
+#END
+
+//================================================================
+
+#PROPERTIES_BLOCK
+/// IF SPECULAR
+
+		[TCP2HeaderHelp(Specular)]
+	/// IF SPECULAR_SHADER_FEATURE
+		[Toggle(TCP2_SPECULAR)] _UseSpecular ("Enable Specular", Float) = 0
+	///
+	/// IF SPECULAR_RAMP
+		[TCP2Gradient] _SpecularRamp ("Specular Ramp (RGB)", 2D) = "gray" {}
+	///
+		[[PROP:Specular Color]]
+	/// IF SPECULAR_ANISOTROPIC || (SPEC_LEGACY && !SPECULAR_RAMP && !SPECULAR_TOON)
+		[[PROP:Specular Smoothness]]
+	/// ELIF SPEC_PBR_BLINNPHONG || SPEC_PBR_GGX
+		[[PROP:Specular Roughness PBR]]
+	///
+	/// IF SPECULAR_ANISOTROPIC
+		[[PROP:Anisotropic Spread]]
+	///
+	/// IF SPECULAR_TOON
+		[[PROP:Specular Toon Size]]
+		[[PROP:Specular Toon Smoothness]]
+	/// ELIF SPECULAR_TOON_BAND
+		[[PROP:Specular Toon Bands]]
+	///
+		[TCP2Separator]
+///
+#END
+
+//================================================================
+
+#VARIABLES
+/// IF (SPEC_LEGACY || SPECULAR_ANISOTROPIC) && SPECULAR_RAMP
+		sampler2D _SpecularRamp;
+///
+/// IF SPEC_PBR_GGX || SPEC_PBR_BLINNPHONG
+
+		//Specular help functions (from UnityStandardBRDF.cginc)
+		inline half3 SafeNormalize(half3 inVec)
+		{
+			half dp3 = max(0.001f, dot(inVec, inVec));
+			return inVec * rsqrt(dp3);
+		}
+
+	/// IF SPEC_PBR_BLINNPHONG
+
+		//PBR Blinn-Phong
+		#define TCP2_PI 3.14159265359
+		inline half PercRoughnessToSpecPower(half roughness)
+		{
+			half sq = max(1e-4f, roughness*roughness);
+			half n = (2.0 / sq) - 2.0;
+			n = max(n, 1e-4f);
+			return n;
+		}
+		inline half NDFBlinnPhong(half NdotH, half n)
+		{
+			// norm = (n+2)/(2*pi)
+			half normTerm = (n + 2.0) * (0.5/TCP2_PI);
+
+			half specTerm = pow (NdotH, n);
+			return specTerm * normTerm;
+		}
+	/// ELIF SPEC_PBR_GGX
+
+		//GGX
+		#define TCP2_PI 3.14159265359
+		#define TCP2_INV_PI        0.31830988618f
+		#if defined(SHADER_API_MOBILE)
+			#define EPSILON 1e-4f
+		#else
+			#define EPSILON 1e-7f
+		#endif
+		inline half GGX(half NdotH, half roughness)
+		{
+			half a2 = roughness * roughness;
+			half d = (NdotH * a2 - NdotH) * NdotH + 1.0f;
+			return TCP2_INV_PI * a2 / (d * d + EPSILON);
+		}
+	///
+///
+#END
+
+//================================================================
+
+#INPUT
+#END
+
+//================================================================
+
+#VERTEX
+#END
+
+//================================================================
+
+#LIGHTING(float4 color, float3 normal, float3 tangent, float3 lightDir, float3 viewDir, float ndl, float ndv, float atten)
+/// IF SPECULAR
+
+	/// IF SPECULAR_SHADER_FEATURE
+		#if defined(TCP2_SPECULAR)
+	///
+	/// IF SPECULAR_ANISOTROPIC
+		//Anisotropic Specular
+		half3 h = normalize(lightDir + viewDir);
+		float ndh = max(0, dot (normal, h));
+		/// IF LWRP
+#HACK: bitangent is already calculated in LWRP
+		half3 binorm = bitangentWS.xyz;
+		/// ELSE
+		half3 binorm = cross(normal, tangent);
+		///
+		float aX = dot(h, tangent) / [[VALUE:Anisotropic Spread]];
+		float aY = dot(h, binorm) / [[VALUE:Specular Smoothness]];
+		float specAniso = sqrt(max(0.0, ndl / ndv)) * exp(-2.0 * (aX * aX + aY * aY) / (1.0 + ndh));
+		/// IF SPECULAR_RAMP
+		float3 spec = tex2D(_SpecularRamp, (specAniso*specAniso).xx).rgb;
+		/// ELIF SPECULAR_TOON
+		float spec = smoothstep([[VALUE:Specular Toon Size]] + [[VALUE:Specular Toon Smoothness]], [[VALUE:Specular Toon Size]] - [[VALUE:Specular Toon Smoothness]],1 - (specAniso / (1+[[VALUE:Specular Toon Smoothness]])));
+		/// ELSE
+		float spec = specAniso;
+		///
+		spec = saturate(spec);
+		/// IF SPECULAR_TOON_BAND
+		spec = floor(spec * [[VALUE:Specular Toon Bands]]) / [[VALUE:Specular Toon Bands]];
+		///
+	/// ELIF SPEC_PBR_BLINNPHONG
+		//Specular: PBR Blinn-Phong
+		half3 halfDir = SafeNormalize(lightDir + viewDir);
+		half roughness = [[VALUE:Specular Roughness PBR]]*[[VALUE:Specular Roughness PBR]];
+		half nh = saturate(dot(normal, halfDir));
+		half spec = NDFBlinnPhong(nh, PercRoughnessToSpecPower(roughness));
+	/// ELIF SPEC_PBR_GGX
+		//Specular: GGX
+		half3 halfDir = SafeNormalize(lightDir + viewDir);
+		half roughness = [[VALUE:Specular Roughness PBR]]*[[VALUE:Specular Roughness PBR]];
+		half nh = saturate(dot(normal, halfDir));
+		half spec = GGX(nh, saturate(roughness));
+		spec *= TCP2_PI * 0.05;
+		#ifdef UNITY_COLORSPACE_GAMMA
+			spec = max(0, sqrt(max(1e-4h, spec)));
+			half surfaceReduction = 1.0 - 0.28 * roughness * [[VALUE:Specular Roughness PBR]];
+		#else
+			half surfaceReduction = 1.0 / (roughness*roughness + 1.0);
+		#endif
+		spec = max(0, spec * ndl);
+		spec *= surfaceReduction;
+	/// ELSE
+		//Blinn-Phong Specular
+		half3 h = normalize(lightDir + viewDir);
+		float ndh = max(0, dot (normal, h));
+		/// IF SPECULAR_RAMP
+		float3 spec = tex2D(_SpecularRamp, (ndh*ndh).xx).rgb;
+		/// ELIF SPECULAR_TOON
+		float spec = smoothstep([[VALUE:Specular Toon Size]] + [[VALUE:Specular Toon Smoothness]], [[VALUE:Specular Toon Size]] - [[VALUE:Specular Toon Smoothness]],1 - (ndh / (1+[[VALUE:Specular Toon Smoothness]])));
+		/// ELSE
+		float spec = pow(ndh, [[VALUE:Specular Smoothness]] * 128.0);
+		///
+		/// IF SPECULAR_TOON_BAND
+		spec = floor(spec * [[VALUE:Specular Toon Bands]]) / [[VALUE:Specular Toon Bands]];
+		///
+		spec *= ndl;
+	///
+	/// IF !SPECULAR_NO_ATTEN
+		spec *= atten;
+	///
+
+		//Apply specular
+		color.rgb += spec * lightColor.rgb * [[VALUE:Specular Color]];
+	/// IF SPECULAR_SHADER_FEATURE
+		#endif
+	///
+///
+#END

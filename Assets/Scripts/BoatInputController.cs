@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BoatInputController : MonoBehaviour
 {
-    [SerializeField] private float boatMinYDegree,boatMaxYDegree,boatRotateSensitivity,boatSpeed,boatRotationSmoothTime;
+    [SerializeField] private float boatMinYDegree,boatMaxYDegree,boatSpeed,boatRotationSmoothTime;
     private float boatYDegree,boatSmoothingVelocity;
     private Quaternion boatInitialRotation;
     private Vector2 initialTouchPosition;
@@ -24,10 +24,7 @@ public class BoatInputController : MonoBehaviour
         else if (Input.GetMouseButton(0))
         {
             Vector2 touchDelta = (Vector2)Input.mousePosition - initialTouchPosition;
-            //touchDelta.x = Mathf.Clamp(touchDelta.x, -1, 1);
             float target = touchDelta.x > 0 ? boatMaxYDegree : boatMinYDegree;
-            //boatYDegree += touchDelta.x * Time.deltaTime * boatRotateSensitivity;
-            //boatYDegree = Mathf.Clamp(boatYDegree, boatMinYDegree, boatMaxYDegree);
             boatYDegree = Mathf.SmoothDamp(boatYDegree, target, ref boatSmoothingVelocity, boatRotationSmoothTime);
             Vector3 boatRotation = new Vector3(boatInitialRotation.x, boatYDegree, boatInitialRotation.z);
             transform.rotation = Quaternion.Euler(boatRotation);

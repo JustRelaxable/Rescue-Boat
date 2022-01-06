@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Water
+  - Missile
+  - FxTemporaire
+  - Boat
   layers:
   - Default
   - TransparentFX

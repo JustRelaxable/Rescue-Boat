@@ -26,6 +26,7 @@ public class BoatInputController : MonoBehaviour
             Vector2 touchDelta = (Vector2)Input.mousePosition - initialTouchPosition;
             float target = touchDelta.x > 0 ? boatMaxYDegree : boatMinYDegree;
             target = target * (Mathf.Abs(touchDelta.x) * boatRotationSensitivity/ Screen.width);
+            target = Mathf.Clamp(target, boatMinYDegree, boatMaxYDegree);
             boatYDegree = Mathf.SmoothDamp(boatYDegree, target, ref boatSmoothingVelocity, boatRotationSmoothTime);
             Vector3 boatRotation = new Vector3(boatInitialRotation.x, boatYDegree, boatInitialRotation.z);
             transform.rotation = Quaternion.Euler(boatRotation);

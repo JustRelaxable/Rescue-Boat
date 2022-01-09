@@ -8,6 +8,8 @@ public class JumpBehaivour : StateMachineBehaviour
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.GetComponent<BoatInputController>().enabled = false;
+        animator.GetComponent<BoatInputController>().waterSplatParticle.SetActive(false);
+        animator.GetComponent<Rigidbody>().isKinematic = true;
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -20,6 +22,8 @@ public class JumpBehaivour : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.GetComponent<BoatInputController>().enabled = true;
+        animator.GetComponent<BoatInputController>().waterSplatParticle.SetActive(true);
+        animator.GetComponent<Rigidbody>().isKinematic = false;
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()

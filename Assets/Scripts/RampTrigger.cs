@@ -8,7 +8,7 @@ public class RampTrigger : MonoBehaviour
     {
         if (other.CompareTag("Boat"))
         {
-            other.GetComponent<Animator>().SetTrigger("CollidedWithPlatform");
+            other.transform.parent.parent.GetComponent<Animator>().SetTrigger("CollidedWithPlatform");
         }
     }
 }

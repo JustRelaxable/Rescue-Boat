@@ -1969,6 +1969,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7533254811061736474}
   - component: {fileID: 3788945637114680613}
+  - component: {fileID: 5497931957844530268}
+  - component: {fileID: 4007330585304730837}
   m_Layer: 0
   m_Name: island
   m_TagString: Untagged
@@ -2033,6 +2035,31 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!135 &5497931957844530268
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7187938497542885024}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 5.284933
+  m_Center: {x: -11.698803, y: 0, z: 1.4370203}
+--- !u!114 &4007330585304730837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7187938497542885024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 272d2e3c130987a4d87572e8e4b33b06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7244792900183738044
 GameObject:
   m_ObjectHideFlags: 0

@@ -27,6 +27,7 @@ public class BoatInputController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        //Input burada alýnmamalý, kötü
         if (Input.GetMouseButtonDown(0))
         {
             initialTouchPosition = Input.mousePosition;

@@ -8,7 +8,7 @@ public class SharkCollisionEvents : MonoBehaviour
     {
         if (other.CompareTag("Boat"))
         {
-            print("Öldün");
+            other.GetComponent<Animator>().SetTrigger("CollidedWithIsland");
         }
     }
 }

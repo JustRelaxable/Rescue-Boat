@@ -15,6 +15,7 @@ public class FinishIslandCollisionEvent : MonoBehaviour
             other.GetComponent<BoatInputController>().DisableSplat();
             other.GetComponent<RescueePositionController>().HideHoomans();
             DsansADmalr();
+            FindObjectOfType<Cinemachine.CinemachineVirtualCamera>().LookAt = dansadam[0];
         }
     }
 

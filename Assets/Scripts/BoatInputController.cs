@@ -45,4 +45,14 @@ public class BoatInputController : MonoBehaviour
         }
         rigidbody.velocity = (transform.forward * boatSpeed);
     }
+
+    public void DisableInputController()
+    {
+        this.enabled = false;
+    }
+
+    public void DisableSplat()
+    {
+        waterSplatParticle.SetActive(false);
+    }
 }

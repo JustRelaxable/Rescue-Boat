@@ -19,4 +19,12 @@ public class RescueePositionController : MonoBehaviour
         progressSlider.value += 1;
         sitIndex++;
     }
+
+    public void HideHoomans()
+    {
+        foreach (var item in rescueeSit)
+        {
+            item.gameObject.SetActive(false);
+        }
+    }
 }
